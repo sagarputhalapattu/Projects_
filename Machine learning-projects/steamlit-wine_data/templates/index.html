@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wine Quality </title>
+</head>
+<body>
+    <h2>Wine Quality </h2>
+    <form action="/predict" method="post">
+        <label> citric_acid (citric_acid): </label>
+        <input type="number" step="any" name="citric_acid" required><br><br>
+
+        <label>residual_sugar (residual_sugar): </label>
+        <input type="number" name="residual_sugar" required><br><br>
+
+        <label> chlorides(chlorides): </label>
+        <input type="number" name="chlorides" required><br><br>
+
+        
+        
+
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction is not none %}
+    <div>
+        <h4>Predicted Wine Quality : ${{ prediction }}</h4>
+    </div>
+    {% endif %}
+</body>
+</html>
