@@ -1,0 +1,15 @@
+======================= Install Following =======================================
+!pip install fastapi uvicorn langchain faiss-cpu pydantic transformers
+!pip install -U langchain-community
+!pip install pypdf
+!pip install langchain-groq
+!pip install sentence-transformers
+pip install jinja2
+
+================================================================================
+
+Run the below line in command terminal 
+
+
+
+uvicorn app_ui:app --reload
