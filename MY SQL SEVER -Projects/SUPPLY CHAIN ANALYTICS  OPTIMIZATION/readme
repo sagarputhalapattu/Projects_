@@ -1,1 +1,156 @@
+# 📦 SUPPLY CHAIN ANALYTICS: SQL-DRIVEN INSIGHTS FOR OPERATIONAL OPTIMIZATION
+
+## 📜 Project Overview
+This project leverages SQL to analyze **supply chain data**, optimize **shipment costs**, and provide **data-driven insights** for better decision-making. The dataset contains **shipment details, costs, product classifications, and operational factors**.
+
+Key objectives include:
+- 🚛 **Freight Cost Analysis**: Compute average and median freight costs.
+- 📊 **Profitability Metrics**: Calculate profit margins per shipment.
+- 📦 **Product & Shipment Classification**: Categorize shipments based on volume and profitability.
+- 🏆 **Performance Ranking**: Rank shipments based on profitability.
+- 📈 **Trend Analysis**: Implement moving averages for forecasting.
+
+---
+
+## 🛠️ Bug Fixes & Improvements
+### ✅ Issue: `Operand data type nvarchar is invalid for avg operator`
+**Fix:**
+- Converted `NVARCHAR` data types to **DECIMAL/INT** using `TRY_CAST()`.
+- Removed invalid non-numeric values with a `WHERE` filter.
+
+```sql
+SELECT DISTINCT freight_cost_usd
+FROM Supply_Chain_Shipment_Pricing_Dataset
+WHERE TRY_CAST(freight_cost_usd AS DECIMAL(18,2)) IS NULL;
+```
+
+---
+### ✅ Issue: `PERCENTILE_CONT must have an OVER clause`
+**Fix:**
+- Added `OVER(PARTITION BY column_name)` to correctly apply percentile calculations.
+
+```sql
+PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY freight_cost_usd)
+OVER (PARTITION BY shipment_mode, managed_by) AS median_freight_cost
+```
+
+---
+### ✅ Issue: Incorrect `ROUND()` syntax
+**Fix:**
+- Ensured `ROUND()` had the correct number of arguments.
+
+```sql
+ROUND(
+    ((AVG(line_item_value * line_item_quantity) - (AVG(freight_cost_usd) + AVG(line_item_insurance_usd)))
+    / NULLIF(AVG(line_item_value), 0)) * 100, 2
+) AS avg_profit_margin_percentage
+```
+
+---
+### ✅ Issue: `Incorrect syntax near ')'`
+**Fix:**
+- Checked missing/mismatched parentheses.
+- Reformatted calculations for clarity.
+
+---
+### ✅ Issue: `HAVING` condition causing errors
+**Fix:**
+- Ensured `AVG()` functions were properly structured.
+- Used `NULLIF()` to prevent division by zero errors.
+
+```sql
+HAVING AVG(line_item_value) - (AVG(freight_cost_usd) + AVG(line_item_insurance_usd)) > 0
+```
+
+---
+
+## 📌 Key SQL Queries
+### 🔹 Profitability Analysis Per Country
+```sql
+SELECT
+    COUNT(*) AS num_shipment,
+    country,
+    ROUND(AVG(TRY_CAST(line_item_value AS DECIMAL(18,2)) * TRY_CAST(line_item_quantity AS INT)) -
+          (AVG(TRY_CAST(freight_cost_usd AS DECIMAL(18,2))) + AVG(TRY_CAST(line_item_insurance_usd AS DECIMAL(18,2)))), 2) AS avg_profit
+FROM Supply_Chain_Shipment_Pricing_Dataset
+GROUP BY country
+HAVING COUNT(*) >= 100
+ORDER BY avg_profit DESC;
+```
+
+### 🔹 Three-Month Moving Average for Profit Trends
+```sql
+SELECT
+    *,
+    AVG(avg_profit) OVER(
+        PARTITION BY shipment_mode, managed_by
+        ORDER BY year, month
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS three_month_moving_avg
+FROM shipments_data
+ORDER BY year, month, shipment_mode, managed_by;
+```
+
+### 🔹 Volume & Profitability Classification
+```sql
+WITH product_metrics AS (
+    SELECT
+        product_group,
+        sub_classification,
+        COUNT(*) AS num_shipment,
+        ROUND(AVG(TRY_CAST(line_item_value AS DECIMAL(18,2)) * TRY_CAST(line_item_quantity AS INT)) -
+              (AVG(TRY_CAST(freight_cost_usd AS DECIMAL(18,2))) + AVG(TRY_CAST(line_item_insurance_usd AS DECIMAL(18,2)))), 2) AS avg_profit
+    FROM Supply_Chain_Shipment_Pricing_Dataset
+    GROUP BY product_group, sub_classification
+)
+SELECT
+    *,
+    CASE
+        WHEN num_shipment >= 1000 AND avg_profit >= 20000 THEN 'High Volume, High Profit'
+        WHEN num_shipment >= 1000 AND avg_profit BETWEEN 4000 AND 20000 THEN 'High Volume, Low Profit'
+        WHEN num_shipment < 1000 AND avg_profit >= 20000 THEN 'Low Volume, High Profit'
+        ELSE 'Low Volume, Low Profit'
+    END AS volume_profit_category
+FROM product_metrics
+ORDER BY num_shipment DESC, avg_profit DESC;
+```
+
+---
+
+## 📊 Insights & Findings
+- **🚀 High-Volume Shipments**: Identified cost-saving opportunities by analyzing bulk shipments.
+- **🔄 Trends & Seasonality**: Implemented a moving average to monitor cost fluctuations over time.
+- **📍 Geographic Optimization**: Found profitable and loss-making regions for supply chain improvements.
+- **🛠️ Profitability Boosters**: Recommended reducing insurance & freight costs based on data patterns.
+
+---
+
+## 🚀 Future Enhancements
+- 🏆 **Advanced Forecasting**: Incorporate time-series models for cost prediction.
+- 📡 **Real-Time Analytics**: Implement dashboards using Power BI/Tableau.
+- 🤖 **Automation**: Use Python for ETL to preprocess and clean data.
+
+---
+
+## 💡 Technologies Used
+- **SQL (PostgreSQL / MySQL / SQL Server)**: Data querying and analysis
+- **Python (Pandas, NumPy)**: Data preprocessing and visualization
+- **Power BI / Tableau**: Dashboarding (Future Scope)
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! Feel free to submit a **Pull Request** or raise an **Issue** for improvements.
+
+📩 **For queries, reach out at:** [your.email@example.com](mailto:your.email@example.com)
+
+---
+
+## 🏆 Acknowledgments
+Special thanks to the **Data Science & Analytics community** for inspiration and best practices! 🚀
+
+---
+
+🔗 **GitHub Repository**: [Supply Chain Analytics](#)
+
 
