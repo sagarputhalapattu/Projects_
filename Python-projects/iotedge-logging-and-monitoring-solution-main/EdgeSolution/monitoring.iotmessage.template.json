@@ -1,0 +1,38 @@
+{
+  "content": {
+    "modulesContent": {
+      "$edgeAgent": {
+        "properties.desired.modules.metricsCollector": {
+          "settings": {
+            "image": "mcr.microsoft.com/azureiotedge-metrics-collector:1.0",
+            "createOptions": ""
+          },
+          "type": "docker",
+          "env": {
+            "UploadTarget": {
+              "value": "IoTMessage"
+            },
+            "ResourceID": {
+              "value": "__HUB_RESOURCE_ID__"
+            },
+            "MetricsEndpointsCSV": {
+              "value": "http://edgeHub:9600/metrics,http://edgeAgent:9600/metrics"
+            },
+            "ScrapeFrequencyInSecs": {
+              "value": "__SCRAPE_FREQUENCY__"
+            },
+            "CompressForUpload": {
+              "value": "__COMPRESS_FOR_UPLOAD__"
+            }
+          },
+          "status": "running",
+          "restartPolicy": "always",
+          "version": "1.0"
+        }
+      },
+      "$edgeHub": {
+        "properties.desired.routes.metricsCollector": "FROM /messages/modules/metricsCollector/* INTO $upstream"
+      }
+    }
+  }
+}
