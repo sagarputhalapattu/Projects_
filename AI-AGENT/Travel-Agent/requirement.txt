@@ -1,0 +1,7 @@
+pip install CrewAI
+pip install SerperDevTool
+pip install Google Gemini API
+pip install Python
+pip install os
+pip install crewai_tools
+pip install Streamlit
